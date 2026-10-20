@@ -51,10 +51,39 @@
 
 ## 改内容
 
-只改 `index.html` 里这两处，其余不用动：
+朋克风格首页，只改 `index.html` 里这几处：
 
-1. `<h1>` 和 `.tag` 那一段（注释 `===== 改这里 =====` 之间）
-2. 下面「项目」「联系」两个 `ul` 里的条目
+**1. 名字** —— 两个地方必须同时改，否则故障（glitch）效果会错位：
+
+```html
+<h1 class="name" data-t="maocici">maocici</h1>
+```
+
+`data-t` 和标签内的文字要完全一致。
+
+**2. 简介** —— `.sub` 那一段，`<b>` 里的词显示为荧光绿。
+
+**3. 联系方式** —— 每个 `.lnk` 里改**两处**：`href` 和 `<span>` 文字要对应（例如 `mailto:` 后的地址和显示的地址要一致）。
+
+**4. 顶栏** —— `.top` 里的 `MAOCICI // SYS.ONLINE`。
+
+### 以后要加「项目」区块
+
+在 `<hr class="hr" />` 之后、`联系` 之前插入：
+
+```html
+<p class="label">项目</p>
+<div class="links">
+  <a class="lnk" href="#">
+    <span>项目名 · 一句话说明</span>
+    <span class="k">ESP32</span>
+  </a>
+  <a class="lnk" href="#">
+    <span>项目名 · 一句话说明</span>
+    <span class="k">JETSON</span>
+  </a>
+</div>
+```
 
 改完重新上传（Cloudflare 直传重拖一次，或 GitHub 重新 commit）即可。
 

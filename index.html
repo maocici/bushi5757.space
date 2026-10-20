@@ -3,78 +3,264 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>你的站点</title>
-<meta name="description" content="一句话介绍你自己或这个站点。">
+<title>MAOCICI</title>
+<meta name="description" content="maocici — 嵌入式 / 硬件 / 边缘计算。ESP32 · Jetson Orin NX · 固件。" />
+<meta name="theme-color" content="#0a0a0a" />
+<meta property="og:title" content="MAOCICI" />
+<meta property="og:description" content="嵌入式 / 硬件 / 边缘计算" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%230a0a0a'/><text x='50' y='76' font-size='72' text-anchor='middle' font-family='Impact,sans-serif' fill='%23d8ff00'>M</text></svg>" />
 <style>
-  :root{
-    --bg:#ffffff; --fg:#1a1a1a; --muted:#6b7280; --line:#e7e9ec; --accent:#2563eb;
-  }
-  @media (prefers-color-scheme: dark){
-    :root{ --bg:#0f1115; --fg:#e8eaed; --muted:#9aa0a6; --line:#262a31; --accent:#7aa2f7; }
-  }
-  *{box-sizing:border-box}
-  html,body{margin:0;padding:0}
-  body{
-    background:var(--bg); color:var(--fg);
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
-    line-height:1.7;
-    -webkit-font-smoothing:antialiased;
-    text-rendering:optimizeLegibility;
-  }
-  .wrap{max-width:660px;margin:0 auto;padding:80px 24px 64px}
-  h1{font-size:2rem;line-height:1.25;margin:0 0 10px;letter-spacing:-.015em;font-weight:700}
-  .tag{color:var(--muted);margin:0 0 44px}
-  h2{font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
-     margin:40px 0 6px;font-weight:600}
-  p{margin:0 0 16px}
-  a{color:var(--accent);text-decoration:none}
-  a:hover{text-decoration:underline}
-  ul{list-style:none;padding:0;margin:0}
-  li{padding:14px 0;border-bottom:1px solid var(--line)}
-  li:last-child{border-bottom:0}
-  .k{display:block;font-weight:600;color:inherit}
-  a.k:hover{color:var(--accent);text-decoration:none}
-  .d{display:block;color:var(--muted);font-size:.9rem;margin-top:2px}
-  footer{margin-top:64px;padding-top:20px;border-top:1px solid var(--line);
-         color:var(--muted);font-size:.85rem}
+:root{
+  --bg:#0a0a0a;
+  --ink:#f2f0e9;
+  --dim:#8d8a80;
+  --line:#2b2b2b;
+  --acid:#d8ff00;
+  --red:#ff2b2b;
+  --display:Impact,"Haettenschweiler","Arial Narrow Bold","Franklin Gothic Heavy",sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Courier New","Microsoft YaHei",monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  min-height:100vh;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--mono);
+  display:flex; align-items:center; justify-content:center;
+  padding:40px 20px;
+  overflow-x:hidden;
+  position:relative;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* 颗粒噪点 */
+.grain{
+  position:fixed; inset:0; z-index:2; pointer-events:none; opacity:.16;
+  mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+/* 跟随光斑 */
+#spot{
+  position:fixed; left:0; top:0; width:560px; height:560px; margin:-280px 0 0 -280px;
+  z-index:0; pointer-events:none; will-change:transform;
+  background:radial-gradient(circle, rgba(216,255,0,.13), rgba(216,255,0,0) 62%);
+}
+/* 自定义光标 */
+#cur,#curDot{position:fixed; left:0; top:0; z-index:9999; pointer-events:none; will-change:transform}
+#cur{
+  width:26px; height:26px; margin:-13px 0 0 -13px;
+  border:2px solid #fff; mix-blend-mode:difference;
+  transition:width .16s, height .16s, margin .16s, border-color .16s;
+}
+#cur.grow{width:46px; height:46px; margin:-23px 0 0 -23px; border-color:var(--acid)}
+#curDot{width:5px; height:5px; margin:-2.5px 0 0 -2.5px; background:#fff; mix-blend-mode:difference}
+html.has-cursor body{cursor:none}
+html.has-cursor a{cursor:none}
+
+.wrap{width:100%; max-width:700px; margin:auto; position:relative; z-index:3}
+
+/* 顶条 */
+.top{
+  display:flex; justify-content:space-between; align-items:center; gap:14px;
+  font-size:.66rem; letter-spacing:.22em; color:var(--dim);
+  border-bottom:2px solid var(--line);
+  padding-bottom:9px; margin-bottom:30px;
+  text-transform:uppercase;
+}
+.top .x{color:var(--red); font-weight:700}
+.top a{color:var(--dim); text-decoration:none; border-bottom:1px solid var(--line); transition:color .15s,border-color .15s}
+.top a:hover{color:var(--acid); border-color:var(--acid)}
+
+/* 名字区 */
+.name-wrap{will-change:transform; position:relative}
+.name{
+  font-family:var(--display);
+  font-size:clamp(3.6rem,16.5vw,8.6rem);
+  line-height:.82;
+  letter-spacing:-.012em;
+  margin:0;
+  color:var(--ink);
+  text-transform:uppercase;
+  transform:skewY(-2deg);
+  text-shadow:6px 6px 0 rgba(216,255,0,.16);
+  user-select:none;
+}
+/* 红色斜贴纸 */
+.sticker{
+  position:absolute; right:-6px; top:-14px;
+  background:var(--red); color:#0a0a0a;
+  font-family:var(--display); font-size:.86rem; letter-spacing:.08em;
+  padding:6px 12px 4px; text-transform:uppercase;
+  transform:rotate(-7deg);
+  box-shadow:3px 3px 0 #000;
+  z-index:4;
+}
+
+/* 副标题 */
+.sub{
+  margin:22px 0 0; font-size:.9rem; line-height:1.9;
+  color:var(--dim); letter-spacing:.02em; max-width:34em;
+}
+.sub b{color:var(--acid); font-weight:700}
+
+/* 联系方式 */
+.label{
+  font-size:.62rem; letter-spacing:.3em; color:var(--dim);
+  text-transform:uppercase; margin:36px 0 12px;
+}
+.label::before{content:"→ "; color:var(--red)}
+
+.links{display:grid; gap:12px}
+.lnk{
+  display:flex; justify-content:space-between; align-items:center; gap:14px;
+  padding:15px 18px;
+  border:2px solid var(--ink);
+  background:transparent; color:var(--ink); text-decoration:none;
+  font-size:.9rem;
+  box-shadow:6px 6px 0 var(--acid);
+  transition:transform .1s, box-shadow .1s, background .12s, color .12s;
+}
+.lnk .k{
+  font-family:var(--display); font-size:.78rem; letter-spacing:.12em;
+  color:#0a0a0a; background:var(--acid); padding:3px 9px 1px;
+}
+.lnk:hover{transform:translate(3px,3px); box-shadow:3px 3px 0 var(--acid); background:var(--acid); color:#0a0a0a}
+.lnk:hover .k{background:#0a0a0a; color:var(--acid)}
+.lnk:focus-visible{outline:3px solid var(--red); outline-offset:3px}
+
+/* 跑马灯 */
+.marquee{
+  margin-top:38px; border-top:2px solid var(--line); border-bottom:2px solid var(--line);
+  overflow:hidden; padding:9px 0; user-select:none;
+}
+.track{
+  display:flex; width:max-content;
+  font-family:var(--display); font-size:.86rem; letter-spacing:.16em;
+  text-transform:uppercase; color:var(--dim);
+  animation:mv 24s linear infinite;
+}
+.track span{padding-right:2.2em; white-space:nowrap}
+.track em{color:var(--red); font-style:normal}
+@keyframes mv{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* 页脚 */
+.foot{
+  margin-top:20px; display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;
+  font-size:.62rem; letter-spacing:.16em; color:var(--dim); text-transform:uppercase;
+}
+.dot{
+  display:inline-block; width:7px; height:7px; margin-right:7px; vertical-align:middle;
+  background:var(--red); animation:blink 1.4s steps(1) infinite;
+}
+@keyframes blink{0%,49%{opacity:1}50%,100%{opacity:.15}}
+
+::selection{background:var(--acid); color:#0a0a0a}
+
+@media (max-width:440px){
+  .sticker{font-size:.72rem; right:0; top:-8px}
+  .sub{font-size:.84rem}
+  .lnk{font-size:.8rem; box-shadow:5px 5px 0 var(--acid)}
+}
+
+@media (prefers-reduced-motion: reduce){
+  .track{animation:none}
+  .dot{animation:none}
+  .lnk{transition:none}
+  #cur{transition:none}
+}
 </style>
 </head>
 <body>
+
+<div class="grain" aria-hidden="true"></div>
+<div id="spot" aria-hidden="true"></div>
+<div id="cur" aria-hidden="true"></div>
+<div id="curDot" aria-hidden="true"></div>
+
 <div class="wrap">
 
-  <!-- ===== 改这里：标题 + 一句话介绍 ===== -->
-  <h1>你好，我是 XXX</h1>
-  <p class="tag">做嵌入式与硬件相关的东西。这里放我的项目和笔记。</p>
-  <!-- ===== 改到这里 ===== -->
+  <div class="top">
+    <span><span class="x">✕</span> MAOCICI</span>
+    <a href="https://github.com/maocici" target="_blank" rel="noopener">github ↗</a>
+  </div>
 
-  <h2>项目</h2>
-  <ul>
-    <li>
-      <a class="k" href="#">项目一 · 一句话说明</a>
-      <span class="d">ESP32-S3 / 数据采集与上报</span>
-    </li>
-    <li>
-      <a class="k" href="#">项目二 · 一句话说明</a>
-      <span class="d">Jetson Orin NX / 边缘推理</span>
-    </li>
-  </ul>
+  <div class="name-wrap" id="nameWrap">
+    <span class="sticker">under construction</span>
+    <h1 class="name">MAOCICI</h1>
+  </div>
 
-  <h2>联系</h2>
-  <ul>
-    <li>
-      <a class="k" href="mailto:me@example.com">me@example.com</a>
-      <span class="d">邮件</span>
-    </li>
-    <li>
-      <a class="k" href="https://github.com/">GitHub</a>
-      <span class="d">代码</span>
-    </li>
-  </ul>
+  <p class="sub">
+    嵌入式 / 硬件 / <b>边缘计算</b><br>
+    ESP32 · Jetson Orin NX · 固件 · 板子
+  </p>
 
-  <footer>
-    占位页面 · 把 XXX 和上面几行换成你的内容，重新上传即可
-  </footer>
+  <p class="label">联系</p>
+  <div class="links">
+    <a class="lnk" href="mailto:bushi5757@gmail.com">
+      <span>bushi5757@gmail.com</span>
+      <span class="k">MAIL</span>
+    </a>
+    <a class="lnk" href="https://github.com/maocici" target="_blank" rel="noopener">
+      <span>github.com/maocici</span>
+      <span class="k">CODE</span>
+    </a>
+  </div>
+
+  <div class="marquee" aria-hidden="true">
+    <div class="track">
+      <span>MAOCICI <em>★</em> SITE UNDER CONSTRUCTION <em>★</em> ESP32 <em>★</em> JETSON <em>★</em> </span>
+      <span>MAOCICI <em>★</em> SITE UNDER CONSTRUCTION <em>★</em> ESP32 <em>★</em> JETSON <em>★</em> </span>
+    </div>
+  </div>
+
+  <div class="foot">
+    <span><i class="dot"></i>施工中</span>
+    <span>PROJECTS // TBA</span>
+  </div>
 
 </div>
+
+<script>
+(function () {
+  var fine = window.matchMedia && window.matchMedia('(hover:hover) and (pointer:fine)').matches;
+  if (!fine) return;
+
+  var ring = document.getElementById('cur');
+  var dot  = document.getElementById('curDot');
+  var spot = document.getElementById('spot');
+  var wrap = document.getElementById('nameWrap');
+  if (!ring || !dot) return;
+
+  document.documentElement.classList.add('has-cursor');
+
+  var mx = window.innerWidth / 2, my = window.innerHeight / 2;
+  var rx = mx, ry = my;
+
+  window.addEventListener('pointermove', function (e) {
+    mx = e.clientX; my = e.clientY;
+    dot.style.transform  = 'translate3d(' + mx + 'px,' + my + 'px,0)';
+    if (spot) spot.style.transform = 'translate3d(' + mx + 'px,' + my + 'px,0)';
+    if (wrap) {
+      var dx = (mx / window.innerWidth  - 0.5) * 2;
+      var dy = (my / window.innerHeight - 0.5) * 2;
+      wrap.style.transform = 'translate3d(' + (dx * 7).toFixed(1) + 'px,' + (dy * 5).toFixed(1) + 'px,0)';
+    }
+  }, { passive: true });
+
+  (function loop() {
+    rx += (mx - rx) * 0.18;
+    ry += (my - ry) * 0.18;
+    ring.style.transform = 'translate3d(' + rx + 'px,' + ry + 'px,0)';
+    requestAnimationFrame(loop);
+  })();
+
+  var targets = document.querySelectorAll('a, .lnk');
+  for (var i = 0; i < targets.length; i++) {
+    targets[i].addEventListener('pointerenter', function () { ring.classList.add('grow'); });
+    targets[i].addEventListener('pointerleave', function () { ring.classList.remove('grow'); });
+  }
+})();
+</script>
 </body>
 </html>
